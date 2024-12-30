@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useState } from "react";
+import searchRecipe from "./actions";
 
 interface MealProps {
   idMeal: string;
@@ -7,40 +7,34 @@ interface MealProps {
 }
 
 export default function Search() {
-  const [data, setData] = useState([] as MealProps[]);
-  const [error, setError] = useState("" as string);
+  const [result, setResult] = useState([] as MealProps[]);
+  const [error, setError] = useState(false);
 
-  const searchRecipe = async (formData: FormData) => {
-    try {
-      const query = formData.get("query");
-      const result = await axios.get(
-        `https://www.themealdb.com/api/json/v1/1/search.php?f=${query}`,
-      );
+  const getData = async (formData: FormData) => {
+    const response = await searchRecipe(formData);
 
-      if (result.data.meals === "no data found" || !result.data.meals) {
-        setError("Pas de résultats");
-      } else {
-        setData(result.data.meals);
-      }
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(error.message);
-      }
-      throw new Error("Une erreur à eu lieu");
+    setResult(response);
+
+    if (response.length) {
+      setError(false);
+    } else {
+      setError(true);
     }
   };
 
   return (
     <div>
       <h1>Rechercher une recette</h1>
-      <form action={searchRecipe}>
+      <form action={getData}>
         <input name="query" />
         <input type="submit" />
       </form>
-      {data.map((recipe) => (
-        <p key={recipe.idMeal}>{recipe.strMeal}</p>
-      ))}
-      {error}
+      <ul>
+        {result.map((r) => (
+          <li key={r.idMeal}>{r.strMeal}</li>
+        ))}
+      </ul>
+      {error ? "Aucun résultat" : null}
     </div>
   );
 }
