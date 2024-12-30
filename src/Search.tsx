@@ -17,7 +17,7 @@ export default function Search() {
         `https://www.themealdb.com/api/json/v1/1/search.php?f=${query}`,
       );
 
-      if (result.data.meals === "no data found") {
+      if (result.data.meals === "no data found" || !result.data.meals) {
         setError("Pas de résultats");
       } else {
         setData(result.data.meals);
